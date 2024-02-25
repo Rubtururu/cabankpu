@@ -66,8 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('user-total-withdrawals').innerText = web3.utils.fromWei(userTotalWithdrawals, 'ether');
     document.getElementById('user-total-dividends').innerText = web3.utils.fromWei(userTotalDividends, 'ether');
 }
-
-
     } else {
         alert('Por favor, instala MetaMask para utilizar esta aplicación.');
     }
