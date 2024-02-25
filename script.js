@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userDeposits = await contract.methods.userDeposits(userAccount).call();
     const userWithdrawals = await contract.methods.userWithdrawals(userAccount).call();
     const userDividendsToday = await contract.methods.getUserDailyDividends(userAccount).call();
-    const userCurrentDeposit = userDeposits - userWithdrawals;
+    const userCurrentDeposit = parseInt(userDeposits) - parseInt(userWithdrawals); // Convertir a números antes de la resta
     const userTotalWithdrawals = userWithdrawals;
     const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
 
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('user-withdrawals').innerText = web3.utils.fromWei(userWithdrawals, 'ether');
     document.getElementById('contract-balance').innerText = web3.utils.fromWei(contractBalance, 'ether');
     document.getElementById('user-dividends-today').innerText = web3.utils.fromWei(userDividendsToday, 'ether');
-    document.getElementById('user-current-deposit').innerText = web3.utils.fromWei(userCurrentDeposit, 'ether');
+    document.getElementById('user-current-deposit').innerText = web3.utils.fromWei(userCurrentDeposit.toString(), 'ether'); // Convertir a cadena antes de mostrar
     document.getElementById('user-total-withdrawals').innerText = web3.utils.fromWei(userTotalWithdrawals, 'ether');
     document.getElementById('user-total-dividends').innerText = web3.utils.fromWei(userTotalDividends, 'ether');
 }
