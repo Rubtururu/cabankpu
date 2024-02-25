@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('user-current-deposit').innerText = web3.utils.fromWei(userCurrentDeposit, 'ether');
     document.getElementById('user-total-withdrawals').innerText = web3.utils.fromWei(userTotalWithdrawals, 'ether');
     document.getElementById('user-total-dividends').innerText = web3.utils.fromWei(userTotalDividends, 'ether');
-    document.getElementById('percentage-of-dividends-pool').innerText = `${percentageOfDividendsPool.toFixed(2)}%`;
 }
     } else {
         alert('Por favor, instala MetaMask para utilizar esta aplicación.');
