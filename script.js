@@ -53,9 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userTotalWithdrawals = userWithdrawals;
     const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
 
-    // Calculamos el porcentaje de la pool de dividendos que le corresponde al usuario
-    const percentageOfDividendsPool = (userDividendsToday / totalDividendsPool) * 100;
-
     // Actualizamos los elementos HTML con las estadísticas obtenidas
     document.getElementById('user-address').innerText = userAccount; // Mostrar la dirección del usuario
     document.getElementById('total-deposits').innerText = web3.utils.fromWei(totalDeposits, 'ether');
@@ -69,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('user-current-deposit').innerText = web3.utils.fromWei(userCurrentDeposit.toString(), 'ether'); // Convertir a cadena antes de mostrar
     document.getElementById('user-total-withdrawals').innerText = web3.utils.fromWei(userTotalWithdrawals, 'ether');
     document.getElementById('user-total-dividends').innerText = web3.utils.fromWei(userTotalDividends, 'ether');
-    document.getElementById('percentage-of-dividends-pool').innerText = `${percentageOfDividendsPool.toFixed(2)}%`;
 }
     } else {
         alert('Por favor, instala MetaMask para utilizar esta aplicación.');
