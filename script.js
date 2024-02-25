@@ -44,30 +44,13 @@ async function updateStats() {
     const lastDividendsPaymentTime = await contract.methods.lastDividendsPaymentTime().call();
     const contractBalance = await contract.methods.getContractBalance().call();
 
-    // Obtener las estadísticas del usuario
-    const userDeposits = await contract.methods.userDeposits(userAccount).call();
-    const userWithdrawals = await contract.methods.userWithdrawals(userAccount).call();
-    const userDividendsToday = await contract.methods.getUserDailyDividends(userAccount).call();
-    const userCurrentDeposit = userDeposits - userWithdrawals;
-    const userTotalWithdrawals = userWithdrawals;
-    const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
-
-    // Calcular y mostrar los dividendos que le corresponden al usuario hoy
-    const dividendsPerUser = await contract.methods.getUserDailyDividends(userAccount).call();
-    document.getElementById('user-dividends-today').innerText = web3.utils.fromWei(dividendsPerUser, 'ether');
-
     // Actualizar los elementos HTML con las estadísticas obtenidas
     document.getElementById('ceo-address').innerText = ceoAddress;
     document.getElementById('total-deposits').innerText = web3.utils.fromWei(totalDeposits, 'ether');
     document.getElementById('total-treasury-pool').innerText = web3.utils.fromWei(totalTreasuryPool, 'ether');
     document.getElementById('total-dividends-pool').innerText = web3.utils.fromWei(totalDividendsPool, 'ether');
     document.getElementById('last-dividends-payment-time').innerText = new Date(lastDividendsPaymentTime * 1000).toLocaleString();
-    document.getElementById('user-deposits').innerText = web3.utils.fromWei(userDeposits, 'ether');
-    document.getElementById('user-withdrawals').innerText = web3.utils.fromWei(userWithdrawals, 'ether');
     document.getElementById('contract-balance').innerText = web3.utils.fromWei(contractBalance, 'ether');
-    document.getElementById('user-current-deposit').innerText = web3.utils.fromWei(userCurrentDeposit, 'ether');
-    document.getElementById('user-total-withdrawals').innerText = web3.utils.fromWei(userTotalWithdrawals, 'ether');
-    document.getElementById('user-total-dividends').innerText = web3.utils.fromWei(userTotalDividends, 'ether');
 }
 } else {
     alert('Por favor, instala MetaMask para utilizar esta aplicación.');
