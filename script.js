@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function updateStats() {
     // Obtenemos las estadísticas del contrato
-    const ceoAddress = await contract.methods.ceoAddress().call();
+     const userAddress = await web3.eth.getCoinbase(); // Obtener la dirección del usuario actual
     const totalDeposits = await contract.methods.totalDeposits().call();
     const totalTreasuryPool = await contract.methods.totalTreasuryPool().call();
     const totalDividendsPool = await contract.methods.totalDividendsPool().call();
