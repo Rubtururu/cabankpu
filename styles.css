@@ -119,11 +119,3 @@ button {
   color: #1d1f21;
   margin-top: 1rem;
 }
-
-/* Add styles for charts */
-.chart-container {
-  margin-top: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 20px;
-}
