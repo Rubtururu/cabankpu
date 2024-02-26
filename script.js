@@ -259,6 +259,14 @@ function createChart(chartId, label, data, color) {
     });
 }
 
+async function fetchInitialData() {
+    // Aquí se obtienen los datos iniciales para las gráficas
+}
+
+function createCharts(data) {
+    // Aquí se crea y actualiza la información de las gráficas
+}
+
 // Función para actualizar los gráficos con nuevos datos
 function updateCharts(newData) {
     // Actualizar gráfico de la Pool de Dividendos
