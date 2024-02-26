@@ -105,6 +105,45 @@ function calcularTiempoRestanteParaPago() {
         segundos: segundosRestantes
     };
 }
+// Obtén una referencia al elemento canvas
+var ctx = document.getElementById('bnb-chart').getContext('2d');
+
+// Inicializa la gráfica con los datos iniciales
+var bnbChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [], // Aquí puedes agregar etiquetas de tiempo si lo deseas
+        datasets: [{
+            label: 'Cantidad de BNB en el contrato',
+            data: [], // Aquí se actualizarán los datos en tiempo real
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+
+// Función para actualizar la gráfica con nuevos datos
+function updateChart(newData) {
+    // Añade nuevos datos al conjunto de datos existente
+    bnbChart.data.datasets[0].data.push(newData);
+
+    // Actualiza la gráfica
+    bnbChart.update();
+}
+
+// Ejemplo de cómo llamar a la función updateChart con nuevos datos
+var newDataPoint = 100; // Aquí deberías reemplazarlo con los datos reales del contrato
+updateChart(newDataPoint);
 
 // Función para actualizar el contador de cuenta atrás
 function actualizarContador() {
