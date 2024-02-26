@@ -3,6 +3,7 @@
   --primary-color: #354D5F;
   --secondary-color: #ffc107;
   --font-family: 'Roboto', sans-serif;
+  --modern-font-family: 'Poppins', sans-serif; /* Nueva fuente moderna */
 }
 
 /* Reset */
@@ -55,21 +56,23 @@ h2 {
   color: #f5f5f5;
   text-align: center;
   margin-bottom: 1rem;
+  font-family: var(--modern-font-family); /* Utilizar la nueva fuente */
 }
 
 h1 {
-  font-size: 2.5rem;
+  font-size: 3rem; /* Aumentar el tamaño de la fuente */
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: 2rem; /* Aumentar el tamaño de la fuente */
 }
 
 /* Paragraph */
 p {
-  font-size: 1rem;
+  font-size: 1.2rem; /* Aumentar el tamaño de la fuente */
   color: #adb5bd;
   margin-bottom: 1rem;
+  font-family: var(--modern-font-family); /* Utilizar la nueva fuente */
 }
 
 /* Highlight */
@@ -94,7 +97,7 @@ p {
 }
 
 #countdown-timer {
-  font-size: 1.2rem;
+  font-size: 1.5rem; /* Aumentar el tamaño de la fuente */
   color: #ffc107;
   display: flex;
   justify-content: center;
@@ -110,6 +113,7 @@ button {
   padding: 0.5rem;
   color: #f5f5f5;
   cursor: pointer;
+  font-family: var(--modern-font-family); /* Utilizar la nueva fuente */
 }
 
 input {
@@ -121,3 +125,4 @@ button {
   color: #1d1f21;
   margin-top: 1rem;
 }
+
