@@ -13,9 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const contract = new web3.eth.Contract(contractABI, contractAddress);
 
         const accounts = await web3.eth.getAccounts();
+
         const userAccount = accounts[0];
 
         updateStats(); // Actualizar estadísticas iniciales
+
+        updateTopDepositors(); // Actualizar el ranking de los depositantes principales
 
         // Event listeners para los botones de depositar, retirar y reclamar dividendos
         document.getElementById('deposit-form').addEventListener('submit', async (e) => {
@@ -23,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const amount = document.getElementById('deposit-amount').value;
             await contract.methods.deposit().send({ from: userAccount, value: web3.utils.toWei(amount, 'ether') });
             updateStats();
+            updateTopDepositors(); // Actualizar el ranking después del depósito
             document.getElementById('deposit-amount').value = ''; // Limpiar el campo después del depósito
         });
 
@@ -31,12 +35,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const amount = document.getElementById('withdraw-amount').value;
             await contract.methods.withdraw(web3.utils.toWei(amount, 'ether')).send({ from: userAccount });
             updateStats();
+            updateTopDepositors(); // Actualizar el ranking después del retiro
             document.getElementById('withdraw-amount').value = ''; // Limpiar el campo después del retiro
         });
 
         document.getElementById('claim-dividends').addEventListener('click', async () => {
             await contract.methods.claimDividends().send({ from: userAccount });
             updateStats();
+            updateTopDepositors(); // Actualizar el ranking después de reclamar dividendos
         });
 
         async function updateStats() {
@@ -46,7 +52,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const totalDividendsPool = await contract.methods.totalDividendsPool().call();
             const lastDividendsPaymentTime = await contract.methods.lastDividendsPaymentTime().call();
             const contractBalance = await contract.methods.getContractBalance().call();
-
             // Obtenemos las estadísticas del usuario
             const userDeposits = await contract.methods.userDeposits(userAccount).call();
             const userWithdrawals = await contract.methods.userWithdrawals(userAccount).call();
@@ -54,7 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const userCurrentDeposit = parseInt(userDeposits) - parseInt(userWithdrawals); // Convertir a números antes de la resta
             const userTotalWithdrawals = userWithdrawals;
             const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
-
             // Actualizamos los elementos HTML con las estadísticas obtenidas
             document.getElementById('user-address').innerText = userAccount; // Mostrar la dirección del usuario
             document.getElementById('total-deposits').innerText = web3.utils.fromWei(totalDeposits, 'ether');
@@ -68,34 +72,71 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('user-current-deposit').innerText = web3.utils.fromWei(userCurrentDeposit.toString(), 'ether'); // Convertir a cadena antes de mostrar
             document.getElementById('user-total-withdrawals').innerText = web3.utils.fromWei(userTotalWithdrawals, 'ether');
             document.getElementById('user-total-dividends').innerText = web3.utils.fromWei(userTotalDividends, 'ether');
+        }
 
-            // Obtener el ranking de los 10 mayores depositantes
-            const allDepositors = await contract.methods.getAllDepositors().call();
-            const topDepositors = allDepositors
-                .map((address) => ({
-                    address,
-                    deposits: parseInt(address),
-                }))
-                .sort((a, b) => b.deposits - a.deposits)
-                .slice(0, 10);
-
-            // Limpiar la lista de ranking antes de actualizarla
-            const rankingList = document.getElementById('top-depositors-ranking');
-            rankingList.innerHTML = '';
-
-            // Agregar los elementos del ranking a la lista
-            topDepositors.forEach((depositor, index) => {
+        async function updateTopDepositors() {
+            // Obtener los 10 depositantes principales
+            const topDepositors = await contract.methods.getAllDepositors().call();
+            const dividendsRanking = document.getElementById('dividends-ranking');
+            // Limpiar la lista antes de actualizarla
+            dividendsRanking.innerHTML = '';
+            // Mostrar los 10 depositantes principales en el ranking
+            topDepositors.slice(0, 10).forEach((depositor, index) => {
                 const listItem = document.createElement('li');
-                listItem.innerText = `${index + 1}. ${depositor.address} - ${web3.utils.fromWei(depositor.deposits.toString(), 'ether')} BNB`;
-                rankingList.appendChild(listItem);
+                listItem.textContent = `${index + 1}. ${depositor}`;
+                dividendsRanking.appendChild(listItem);
             });
         }
 
     } else {
-
         alert('Por favor, instala MetaMask para utilizar esta aplicación.');
-
     }
-
 });
 
+// Función para calcular el tiempo restante hasta el próximo pago de dividendos
+function calcularTiempoRestanteParaPago() {
+    // Obtener la fecha y hora actuales en UTC
+    const ahora = new Date();
+    const horaActualUTC = ahora.getUTCHours();
+    const minutosActualesUTC = ahora.getUTCMinutes();
+    const segundosActualesUTC = ahora.getUTCSeconds();
+    // Calcular la cantidad de tiempo hasta las 20:00 UTC
+    let horasRestantes = 20 - horaActualUTC;
+    let minutosRestantes = 0;
+    let segundosRestantes = 0;
+    // Si ya es después de las 20:00 UTC, calcular el tiempo hasta las 20:00 UTC del día siguiente
+    if (horaActualUTC >= 20) {
+        horasRestantes = 24 - (horaActualUTC - 20);
+    }
+    // Calcular los minutos y segundos restantes
+    if (minutosActualesUTC > 0 || segundosActualesUTC > 0) {
+        horasRestantes--;
+        minutosRestantes = 60 - minutosActualesUTC;
+        segundosRestantes = 60 - segundosActualesUTC;
+    }
+    // Retornar el tiempo restante como objeto
+    return {
+        horas: horasRestantes,
+        minutos: minutosRestantes,
+        segundos: segundosRestantes
+    };
+}
+
+// Función para actualizar el contador de cuenta atrás
+function actualizarContador() {
+    // Obtener el elemento del contador
+    const contador = document.getElementById('countdown-timer');
+    // Calcular el tiempo restante
+    const tiempoRestante = calcularTiempoRestanteParaPago();
+    // Mostrar el tiempo restante en el contador
+    contador.textContent = `${tiempoRestante.horas}h ${tiempoRestante.minutos}m ${tiempoRestante.segundos}s`;
+}
+
+// Función para inicializar el contador de cuenta atrás
+function inicializarContador() {
+    // Actualizar el contador cada segundo
+    setInterval(actualizarContador, 1000);
+}
+
+// Inicializar el contador al cargar la página
+inicializarContador();
