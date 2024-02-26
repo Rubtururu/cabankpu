@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
+
     if (window.ethereum) {
+
         window.web3 = new Web3(window.ethereum);
+
         await window.ethereum.enable();
 
         const contractAddress = '0xbCE1A4fd396A160A3D47e56C7767dB11A19043bD'; // Dirección del contrato desplegado
@@ -10,218 +13,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         const contract = new web3.eth.Contract(contractABI, contractAddress);
 
         const accounts = await web3.eth.getAccounts();
+
         const userAccount = accounts[0];
 
-        // Funciones de interacción con el contrato
-        async function deposit(amount) {
-            try {
-                const tx = await contract.methods.deposit().send({ from: userAccount, value: amount });
-                console.log(tx);
-                // Actualizar UI o mostrar mensaje de éxito
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-            }
+        updateStats(); // Actualizar estadísticas iniciales
+
+        // Event listeners para los botones de depositar, retirar y reclamar dividendos
+        document.getElementById('deposit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = document.getElementById('deposit-amount').value;
+            await contract.methods.deposit().send({ from: userAccount, value: web3.utils.toWei(amount, 'ether') });
+            updateStats();
+            document.getElementById('deposit-amount').value = ''; // Limpiar el campo después del depósito
+        });
+
+        document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = document.getElementById('withdraw-amount').value;
+            await contract.methods.withdraw(web3.utils.toWei(amount, 'ether')).send({ from: userAccount });
+            updateStats();
+            document.getElementById('withdraw-amount').value = ''; // Limpiar el campo después del retiro
+        });
+
+        document.getElementById('claim-dividends').addEventListener('click', async () => {
+            await contract.methods.claimDividends().send({ from: userAccount });
+            updateStats();
+        });
+
+        async function updateStats() {
+            // Obtenemos las estadísticas del contrato
+            const totalDeposits = await contract.methods.totalDeposits().call();
+            const totalTreasuryPool = await contract.methods.totalTreasuryPool().call();
+            const totalDividendsPool = await contract.methods.totalDividendsPool().call();
+            const lastDividendsPaymentTime = await contract.methods.lastDividendsPaymentTime().call();
+            const contractBalance = await contract.methods.getContractBalance().call();
+            // Obtenemos las estadísticas del usuario
+            const userDeposits = await contract.methods.userDeposits(userAccount).call();
+            const userWithdrawals = await contract.methods.userWithdrawals(userAccount).call();
+            const userDividendsToday = await contract.methods.getUserDailyDividends(userAccount).call();
+            const userCurrentDeposit = parseInt(userDeposits) - parseInt(userWithdrawals); // Convertir a números antes de la resta
+            const userTotalWithdrawals = userWithdrawals;
+            const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
+            const userDividendsTodayBNB = web3.utils.fromWei(userDividendsToday, 'ether'); // Convertir dividendos de wei a BNB
+
+            // Actualizamos los elementos HTML con las estadísticas obtenidas
+            document.getElementById('user-address').innerText = userAccount; // Mostrar la dirección del usuario
+            document.getElementById('total-deposits').innerText = web3.utils.fromWei(totalDeposits, 'ether');
+            document.getElementById('total-treasury-pool').innerText = web3.utils.fromWei(totalTreasuryPool, 'ether');
+            document.getElementById('total-dividends-pool').innerText = web3.utils.fromWei(totalDividendsPool, 'ether');
+            document.getElementById('last-dividends-payment-time').innerText = new Date(lastDividendsPaymentTime * 1000).toLocaleString();
+            document.getElementById('user-deposits').innerText = web3.utils.fromWei(userDeposits, 'ether');
+            document.getElementById('user-withdrawals').innerText = web3.utils.fromWei(userWithdrawals, 'ether');
+            document.getElementById('contract-balance').innerText = web3.utils.fromWei(contractBalance, 'ether');
+            document.getElementById('user-dividends-today').innerText = userDividendsTodayBNB + " BNB"; // Mostrar dividendos de hoy en BNB
+            document.getElementById('user-current-deposit').innerText = web3.utils.fromWei(userCurrentDeposit.toString(), 'ether'); // Convertir a cadena antes de mostrar
+            document.getElementById('user-total-withdrawals').innerText = web3.utils.fromWei(userTotalWithdrawals, 'ether');
+            document.getElementById('user-total-dividends').innerText = web3.utils.fromWei(userTotalDividends, 'ether');
         }
-
-        async function withdraw(amount) {
-            try {
-                const tx = await contract.methods.withdraw(amount).send({ from: userAccount });
-                console.log(tx);
-                // Actualizar UI o mostrar mensaje de éxito
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-            }
-        }
-
-        async function claimDividends() {
-            try {
-                const tx = await contract.methods.claimDividends().send({ from: userAccount });
-                console.log(tx);
-                // Actualizar UI o mostrar mensaje de éxito
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-            }
-        }
-
-        async function getUserDailyDividends(user) {
-            try {
-                const dividends = await contract.methods.getUserDailyDividends(user).call();
-                console.log('Daily dividends for user', dividends);
-                // Actualizar UI con las dividendos diarios del usuario
-                return dividends;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getUserAvailableDividends(user) {
-            try {
-                const dividends = await contract.methods.getUserAvailableDividends(user).call();
-                console.log('Available dividends for user', dividends);
-                // Actualizar UI con las dividendos disponibles del usuario
-                return dividends;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getContractBalance() {
-            try {
-                const balance = await contract.methods.getContractBalance().call();
-                console.log('Contract balance', balance);
-                // Actualizar UI con el saldo del contrato
-                return balance;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getNextDividendsPaymentTime() {
-            try {
-                const time = await contract.methods.getNextDividendsPaymentTime().call();
-                console.log('Next dividends payment time', new Date(time * 1000));
-                // Actualizar UI con el tiempo del próximo pago de dividendos
-                return time;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getUserDeposits(user) {
-            try {
-                const deposits = await contract.methods.userDeposits(user).call();
-                console.log('User deposits', deposits);
-                // Actualizar UI con los depósitos del usuario
-                return deposits;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getUserWithdrawals(user) {
-            try {
-                const withdrawals = await contract.methods.userWithdrawals(user).call();
-                console.log('User withdrawals', withdrawals);
-                // Actualizar UI con los retiros del usuario
-                return withdrawals;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getUserDividends(user) {
-            try {
-                const dividends = await contract.methods.userDividends(user).call();
-                console.log('User dividends', dividends);
-                // Actualizar UI con los dividendos del usuario
-                return dividends;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getUserDividendsClaimed(user) {
-            try {
-                const dividendsClaimed = await contract.methods.userDividendsClaimed(user).call();
-                console.log('User dividends claimed', dividendsClaimed);
-                // Actualizar UI con los dividendos reclamados por el usuario
-                return dividendsClaimed;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getTotalDeposits() {
-            try {
-                const totalDeposits = await contract.methods.totalDeposits().call();
-                console.log('Total deposits', totalDeposits);
-                // Actualizar UI con los depósitos totales
-                return totalDeposits;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getTotalTreasuryPool() {
-            try {
-                const totalTreasuryPool = await contract.methods.totalTreasuryPool().call();
-                console.log('Total treasury pool', totalTreasuryPool);
-                // Actualizar UI con el total del tesoro
-                return totalTreasuryPool;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getTotalDividendsPool() {
-            try {
-                const totalDividendsPool = await contract.methods.totalDividendsPool().call();
-                console.log('Total dividends pool', totalDividendsPool);
-                // Actualizar UI con el total de la pool de dividendos
-                return totalDividendsPool;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        async function getLastDividendsPaymentTime() {
-            try {
-                const time = await contract.methods.lastDividendsPaymentTime().call();
-                console.log('Last dividends payment time', new Date(time * 1000));
-                // Actualizar UI con el tiempo del último pago de dividendos
-                return time;
-            } catch (error) {
-                console.error(error);
-                // Mostrar mensaje de error
-                return 0;
-            }
-        }
-
-        // Ejemplo de uso de las funciones
-        // await deposit(0.1); // Depositar 0.1 Ether
-        // await withdraw(0.05); // Retirar 0.05 Ether
-        // await claimDividends(); // Reclamar dividendos
-        // await getUserDailyDividends(userAccount);
-        // await getUserAvailableDividends(userAccount);
-        // await getContractBalance();
-        // await getNextDividendsPaymentTime();
-        // await getUserDeposits(userAccount);
-        // await getUserWithdrawals(userAccount);
-        // await getUserDividends(userAccount);
-        // await getUserDividendsClaimed(userAccount);
-        // await getTotalDeposits();
-        // await getTotalTreasuryPool();
-        // await getTotalDividendsPool();
-        // await getLastDividendsPaymentTime();
-
-        // Puedes conectar estas funciones a eventos de botones en tu UI
     } else {
-        console.error('MetaMask no está instalado');
-        // Mostrar mensaje de error o instrucciones para instalar MetaMask
+        alert('Por favor, instala MetaMask para utilizar esta aplicación.');
     }
 });
