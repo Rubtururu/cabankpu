@@ -170,5 +170,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('Por favor, instala MetaMask para utilizar esta aplicación.');
 
     }
+// Función para obtener la lista de los top 10 usuarios que más dividendos ganan
+async function getTopUsers() {
+    const topUsers = [];
+    // Obtener la lista de usuarios del contrato
+    const userList = await contract.methods.getUserList().call();
+    // Iterar sobre la lista de usuarios
+    for (let i = 0; i < Math.min(userList.length, 10); i++) {
+        const userAddress = userList[i];
+        // Obtener los dividendos del usuario
+        const userDividends = await contract.methods.getUserDividends(userAddress).call();
+        // Agregar el usuario y sus dividendos a la lista de top users
+        topUsers.push({ address: userAddress, dividends: userDividends });
+    }
+    return topUsers;
+}
 
+// Función para mostrar el ranking de los top 10 usuarios en la página HTML
+function displayTopUsers(topUsers) {
+    const rankingContainer = document.getElementById('top-users');
+    rankingContainer.innerHTML = ''; // Limpiar el contenedor antes de mostrar la lista actualizada
+    topUsers.forEach((user, index) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${index + 1}. ${user.address}: ${user.dividends}`;
+        rankingContainer.appendChild(listItem);
+    });
+}
 });
