@@ -53,16 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userTotalWithdrawals = userWithdrawals;
     const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
 
-// Convertir el tiempo de pago de dividendos a una fecha local
-    const lastDividendsPaymentTime = new Date(lastDividendsPaymentTimeUTC * 1000);
-    const localLastDividendsPaymentTime = lastDividendsPaymentTime.toLocaleString();
-
-    // Calcular el tiempo restante hasta las 20:00 UTC del día siguiente
-    const now = new Date();
-    const hoursUntilNextPayment = (20 - now.getUTCHours() + 24) % 24;
-    const minutesUntilNextPayment = 60 - now.getUTCMinutes();
-    const secondsUntilNextPayment = 60 - now.getUTCSeconds();
-
     // Actualizamos los elementos HTML con las estadísticas obtenidas
     document.getElementById('user-address').innerText = userAccount; // Mostrar la dirección del usuario
     document.getElementById('total-deposits').innerText = web3.utils.fromWei(totalDeposits, 'ether');
