@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
 
     // Calcular la cantidad exacta de BNB que le corresponde al usuario como dividendos hoy
-    const userSharePercentage = parseFloat(web3.utils.fromWei(userDeposits, 'ether')) / parseFloat(web3.utils.fromWei(totalTreasuryPool, 'ether'));
-    const dividendsAvailableToday = parseFloat(web3.utils.fromWei(totalDividendsPool, 'ether'));
+    const userSharePercentage = parseFloat(userDeposits) / parseFloat(totalTreasuryPool);
+    const dividendsAvailableToday = parseFloat(totalDividendsPool);
     const userDividendsTodayExact = dividendsAvailableToday * userSharePercentage;
 
     // Actualizamos los elementos HTML con las estadísticas obtenidas
