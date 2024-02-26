@@ -104,6 +104,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         alert('Por favor, instala MetaMask para utilizar esta aplicación.');
     }
+// Función para calcular el tiempo restante hasta el próximo pago de dividendos
+function calcularTiempoRestanteParaPago() {
+    // Obtener la fecha y hora actuales en UTC
+    const ahora = new Date();
+    const horaActualUTC = ahora.getUTCHours();
+    const minutosActualesUTC = ahora.getUTCMinutes();
+    const segundosActualesUTC = ahora.getUTCSeconds();
 
+    // Establecer la hora del próximo pago de dividendos a las 15:30 UTC del 27/2/24
+    let proximoPago = new Date('2024-02-27T15:30:00Z');
+
+    // Calcular la diferencia de tiempo en milisegundos
+    let diferenciaTiempo = proximoPago - ahora;
+    if (diferenciaTiempo < 0) {
+        // Si el próximo pago ya pasó, calcular el próximo pago en 6 horas
+        proximoPago = new Date(proximoPago.getTime() + 6 * 60 * 60 * 1000); // Sumar 6 horas
+        diferenciaTiempo = proximoPago - ahora;
+    }
+
+    // Calcular horas, minutos y segundos restantes
+    const horasRestantes = Math.floor(diferenciaTiempo / (1000 * 60 * 60));
+    diferenciaTiempo %= (1000 * 60 * 60);
+    const minutosRestantes = Math.floor(diferenciaTiempo / (1000 * 60));
+    diferenciaTiempo %= (1000 * 60);
+    const segundosRestantes = Math.floor(diferenciaTiempo / 1000);
+
+    // Retornar el tiempo restante como objeto
+    return {
+        horas: horasRestantes,
+        minutos: minutosRestantes,
+        segundos: segundosRestantes
+    };
+}
 });
 
