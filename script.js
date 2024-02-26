@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const userDividendsToday = await contract.methods.getUserDailyDividends(userAccount).call();
             const userCurrentDeposit = parseInt(userDeposits) - parseInt(userWithdrawals); // Convertir a números antes de la resta
             const userTotalWithdrawals = userWithdrawals;
-                        const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
+            const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
             // Actualizamos los elementos HTML con las estadísticas obtenidas
             document.getElementById('user-address').innerText = userAccount; // Mostrar la dirección del usuario
             document.getElementById('total-deposits').innerText = web3.utils.fromWei(totalDeposits, 'ether');
@@ -100,17 +100,20 @@ function calcularTiempoRestanteParaPago() {
     const horaActualUTC = ahora.getUTCHours();
     const minutosActualesUTC = ahora.getUTCMinutes();
     const segundosActualesUTC = ahora.getUTCSeconds();
-    // Calcular la cantidad de tiempo hasta las 20:30 UTC del 26 de febrero de 2024
-    let tiempoRestanteMs = Date.UTC(2024, 1, 26, 20, 30, 0) - Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), horaActualUTC, minutosActualesUTC, segundosActualesUTC);
-    if (tiempoRestanteMs < 0) {
-        tiempoRestanteMs += 24 * 60 * 60 * 1000; // Sumar un día si ya pasó la hora de pago
+    // Calcular la cantidad de tiempo hasta las 20:00 UTC
+    let horasRestantes = 20 - horaActualUTC;
+    let minutosRestantes = 0;
+    let segundosRestantes = 0;
+    // Si ya es después de las 20:00 UTC, calcular el tiempo hasta las 20:00 UTC del día siguiente
+    if (horaActualUTC >= 20) {
+        horasRestantes = 24 - (horaActualUTC - 20);
     }
-    // Convertir el tiempo restante a horas, minutos y segundos
-    const horasRestantes = Math.floor(tiempoRestanteMs / (60 * 60 * 1000));
-    tiempoRestanteMs -= horasRestantes * 60 * 60 * 1000;
-    const minutosRestantes = Math.floor(tiempoRestanteMs / (60 * 1000));
-    tiempoRestanteMs -= minutosRestantes * 60 * 1000;
-    const segundosRestantes = Math.floor(tiempoRestanteMs / 1000);
+    // Calcular los minutos y segundos restantes
+    if (minutosActualesUTC > 0 || segundosActualesUTC > 0) {
+        horasRestantes--;
+        minutosRestantes = 60 - minutosActualesUTC;
+        segundosRestantes = 60 - segundosActualesUTC;
+    }
     // Retornar el tiempo restante como objeto
     return {
         horas: horasRestantes,
