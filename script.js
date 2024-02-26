@@ -144,6 +144,11 @@ async function updateStats() {
 
 }
 
+// Obtener datos iniciales para los gráficos
+        const initialData = await fetchInitialData();
+
+        // Crear gráficos
+        createCharts(initialData);
 
 
     } else {
