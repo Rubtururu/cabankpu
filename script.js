@@ -16,8 +16,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const contract = new web3.eth.Contract(contractABI, contractAddress);
 
-
-
         const accounts = await web3.eth.getAccounts();
 
         const userAccount = accounts[0];
@@ -26,6 +24,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         updateStats(); // Actualizar estadísticas iniciales
 
+        // Obtener datos iniciales para los gráficos
+        const initialData = await fetchInitialData();
+        // Crear gráficos
+        createCharts(initialData);
+
+        // Actualizar gráficos con nuevos datos cada cierto intervalo
+        setInterval(async () => {
+            const newData = await fetchInitialData();
+            updateCharts(newData);
+        }, 5000); // Actualizar cada 5 segundos
 
 
         // Event listeners para los botones de depositar, retirar y reclamar dividendos
@@ -162,94 +170,107 @@ function calcularTiempoRestanteParaPago() {
 
     const segundosActualesUTC = ahora.getUTCSeconds();
 
-    
-
-    // Calcular la cantidad de tiempo hasta las 20:00 UTC
-
+ // Calcular la cantidad de tiempo hasta las 20:00 UTC
     let horasRestantes = 20 - horaActualUTC;
-
     let minutosRestantes = 0;
-
     let segundosRestantes = 0;
 
-
-
     // Si ya es después de las 20:00 UTC, calcular el tiempo hasta las 20:00 UTC del día siguiente
-
     if (horaActualUTC >= 20) {
-
         horasRestantes = 24 - (horaActualUTC - 20);
-
     }
-
-
 
     // Calcular los minutos y segundos restantes
-
     if (minutosActualesUTC > 0 || segundosActualesUTC > 0) {
-
         horasRestantes--;
-
         minutosRestantes = 60 - minutosActualesUTC;
-
         segundosRestantes = 60 - segundosActualesUTC;
-
     }
 
-
-
     // Retornar el tiempo restante como objeto
-
     return {
-
         horas: horasRestantes,
-
         minutos: minutosRestantes,
-
         segundos: segundosRestantes
-
     };
-
 }
-
-
 
 // Función para actualizar el contador de cuenta atrás
-
 function actualizarContador() {
-
     // Obtener el elemento del contador
-
     const contador = document.getElementById('countdown-timer');
 
-
-
     // Calcular el tiempo restante
-
     const tiempoRestante = calcularTiempoRestanteParaPago();
 
-
-
     // Mostrar el tiempo restante en el contador
-
     contador.textContent = `${tiempoRestante.horas}h ${tiempoRestante.minutos}m ${tiempoRestante.segundos}s`;
-
 }
-
-
 
 // Función para inicializar el contador de cuenta atrás
-
 function inicializarContador() {
-
     // Actualizar el contador cada segundo
-
     setInterval(actualizarContador, 1000);
-
 }
 
-
-
 // Inicializar el contador al cargar la página
-
 inicializarContador();
+
+
+// Función para obtener datos iniciales para los gráficos
+async function fetchInitialData() {
+    const totalDividendsPool = await contract.methods.totalDividendsPool().call();
+    const totalTreasuryPool = await contract.methods.totalTreasuryPool().call();
+    return {
+        totalDividendsPool: web3.utils.fromWei(totalDividendsPool, 'ether'),
+        totalTreasuryPool: web3.utils.fromWei(totalTreasuryPool, 'ether')
+    };
+}
+
+// Función para crear los gráficos iniciales
+function createCharts(initialData) {
+    // Crear gráfico de la Pool de Dividendos
+    createChart('dividends-chart', 'Pool de Dividendos', initialData.totalDividendsPool, '#ffc107');
+
+    // Crear gráfico de la Pool del Tesoro
+    createChart('treasury-chart', 'Pool del Tesoro', initialData.totalTreasuryPool, '#343a40');
+}
+
+// Función para crear un gráfico
+function createChart(chartId, label, data, color) {
+    const ctx = document.getElementById(chartId).getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [label, 'Restante'],
+            datasets: [{
+                data: [data, 100 - data],
+                backgroundColor: [color, '#f5f5f5'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '80%',
+            maintainAspectRatio: false,
+            legend: {
+                display: false
+            }
+        }
+    });
+}
+
+// Función para actualizar los gráficos con nuevos datos
+function updateCharts(newData) {
+    // Actualizar gráfico de la Pool de Dividendos
+    updateChart('dividends-chart', newData.totalDividendsPool);
+
+    // Actualizar gráfico de la Pool del Tesoro
+    updateChart('treasury-chart', newData.totalTreasuryPool);
+}
+
+// Función para actualizar un gráfico con nuevos datos
+function updateChart(chartId, newData) {
+    const chart = Chart.getChart(chartId);
+    chart.data.datasets[0].data = [newData, 100 - newData];
+    chart.update();
+}
