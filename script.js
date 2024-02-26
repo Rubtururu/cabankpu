@@ -166,3 +166,35 @@ function inicializarContador() {
 // Inicializar el contador al cargar la página
 inicializarContador();
 
+// Instancia del contrato
+const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+// Función para obtener la cantidad de BNB en el contrato
+async function getContractBalance() {
+    try {
+        // Llama a la función del contrato que devuelve la cantidad de BNB en el contrato
+        const contractBalance = await contract.methods.getContractBalance().call();
+        return contractBalance;
+    } catch (error) {
+        console.error('Error al obtener el balance del contrato:', error);
+        return 0;
+    }
+}
+
+// Función para actualizar la gráfica con los datos del contrato
+async function updateChart() {
+    try {
+        // Obtiene la cantidad de BNB en el contrato
+        const balance = await getContractBalance();
+        
+        // Actualiza la gráfica con la nueva cantidad de BNB
+        updateChart(balance);
+    } catch (error) {
+        console.error('Error al actualizar la gráfica:', error);
+    }
+}
+
+// Llama a la función de actualización de la gráfica al cargar la página
+window.onload = function() {
+    updateChart();
+};
