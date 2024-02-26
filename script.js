@@ -134,7 +134,7 @@ var bnbChart = new Chart(ctx, {
 
 // Función para actualizar la gráfica con nuevos datos
 function updateChart(newData) {
-    // Añade nuevos datos al conjunto de datos existente
+    // Añade un nuevo punto de datos al conjunto de datos existente
     bnbChart.data.datasets[0].data.push(newData);
 
     // Actualiza la gráfica
