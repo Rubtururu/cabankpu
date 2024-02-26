@@ -46,33 +46,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         async function updateStats() {
-            // Obtenemos las estadísticas del contrato
-            const totalDeposits = await contract.methods.totalDeposits().call();
-            const totalTreasuryPool = await contract.methods.totalTreasuryPool().call();
-            const totalDividendsPool = await contract.methods.totalDividendsPool().call();
-            const lastDividendsPaymentTime = await contract.methods.lastDividendsPaymentTime().call();
-            const contractBalance = await contract.methods.getContractBalance().call();
-            // Obtenemos las estadísticas del usuario
-            const userDeposits = await contract.methods.userDeposits(userAccount).call();
-            const userWithdrawals = await contract.methods.userWithdrawals(userAccount).call();
-            const userDividendsToday = await contract.methods.getUserDailyDividends(userAccount).call();
-            const userCurrentDeposit = parseInt(userDeposits) - parseInt(userWithdrawals); // Convertir a números antes de la resta
-            const userTotalWithdrawals = userWithdrawals;
-            const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
-            // Actualizamos los elementos HTML con las estadísticas obtenidas
-            document.getElementById('user-address').innerText = userAccount; // Mostrar la dirección del usuario
-            document.getElementById('total-deposits').innerText = web3.utils.fromWei(totalDeposits, 'ether');
-            document.getElementById('total-treasury-pool').innerText = web3.utils.fromWei(totalTreasuryPool, 'ether');
-            document.getElementById('total-dividends-pool').innerText = web3.utils.fromWei(totalDividendsPool, 'ether');
-            document.getElementById('last-dividends-payment-time').innerText = new Date(lastDividendsPaymentTime * 1000).toLocaleString();
-            document.getElementById('user-deposits').innerText = web3.utils.fromWei(userDeposits, 'ether');
-            document.getElementById('user-withdrawals').innerText = web3.utils.fromWei(userWithdrawals, 'ether');
-            document.getElementById('contract-balance').innerText = web3.utils.fromWei(contractBalance, 'ether');
-            document.getElementById('user-dividends-today').innerText = web3.utils.fromWei(userDividendsToday, 'ether');
-            document.getElementById('user-current-deposit').innerText = web3.utils.fromWei(userCurrentDeposit.toString(), 'ether'); // Convertir a cadena antes de mostrar
-            document.getElementById('user-total-withdrawals').innerText = web3.utils.fromWei(userTotalWithdrawals, 'ether');
-            document.getElementById('user-total-dividends').innerText = web3.utils.fromWei(userTotalDividends, 'ether');
-        }
+    // Obtenemos las estadísticas del contrato
+    const totalDeposits = await contract.methods.totalDeposits().call();
+    const totalTreasuryPool = await contract.methods.totalTreasuryPool().call();
+    const totalDividendsPool = await contract.methods.totalDividendsPool().call();
+    const lastDividendsPaymentTime = await contract.methods.lastDividendsPaymentTime().call();
+    const contractBalance = await contract.methods.getContractBalance().call();
+    // Obtenemos las estadísticas del usuario
+    const userDeposits = await contract.methods.userDeposits(userAccount).call();
+    const userWithdrawals = await contract.methods.userWithdrawals(userAccount).call();
+    const userDividendsToday = await contract.methods.getUserDailyDividends(userAccount).call();
+    const userCurrentDeposit = parseInt(userDeposits) - parseInt(userWithdrawals); // Convertir a números antes de la resta
+    const userTotalWithdrawals = userWithdrawals;
+    const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
+
+    // Calcular la cantidad exacta de BNB que le corresponde al usuario como dividendos hoy
+    const userSharePercentage = parseFloat(web3.utils.fromWei(userDeposits, 'ether')) / parseFloat(web3.utils.fromWei(totalTreasuryPool, 'ether'));
+    const dividendsAvailableToday = parseFloat(web3.utils.fromWei(totalDividendsPool, 'ether'));
+    const userDividendsTodayExact = dividendsAvailableToday * userSharePercentage;
+
+    // Actualizamos los elementos HTML con las estadísticas obtenidas
+    document.getElementById('user-address').innerText = userAccount; // Mostrar la dirección del usuario
+    document.getElementById('total-deposits').innerText = web3.utils.fromWei(totalDeposits, 'ether');
+    document.getElementById('total-treasury-pool').innerText = web3.utils.fromWei(totalTreasuryPool, 'ether');
+    document.getElementById('total-dividends-pool').innerText = web3.utils.fromWei(totalDividendsPool, 'ether');
+    document.getElementById('last-dividends-payment-time').innerText = new Date(lastDividendsPaymentTime * 1000).toLocaleString();
+    document.getElementById('user-deposits').innerText = web3.utils.fromWei(userDeposits, 'ether');
+    document.getElementById('user-withdrawals').innerText = web3.utils.fromWei(userWithdrawals, 'ether');
+    document.getElementById('contract-balance').innerText = web3.utils.fromWei(contractBalance, 'ether');
+    document.getElementById('user-dividends-today').innerText = web3.utils.fromWei(userDividendsTodayExact.toString(), 'ether');
+    document.getElementById('user-current-deposit').innerText = web3.utils.fromWei(userCurrentDeposit.toString(), 'ether'); // Convertir a cadena antes de mostrar
+    document.getElementById('user-total-withdrawals').innerText = web3.utils.fromWei(userTotalWithdrawals, 'ether');
+    document.getElementById('user-total-dividends').innerText = web3.utils.fromWei(userTotalDividends, 'ether');
+}
 
         // Temporizador para el pago de dividendos cada 6 horas, comenzando a las 15:30 UTC del 27 de febrero de 2024
         function calcularTiempoRestanteParaPago() {
