@@ -264,13 +264,6 @@ function createChart(chartId, label, data, color) {
     });
 }
 
-async function fetchInitialData() {
-    // Aquí se obtienen los datos iniciales para las gráficas
-}
-
-function createCharts(data) {
-    // Aquí se crea y actualiza la información de las gráficas
-}
 
 // Función para actualizar los gráficos con nuevos datos
 function updateCharts(newData) {
@@ -286,4 +279,66 @@ function updateChart(chartId, newData) {
     const chart = Chart.getChart(chartId);
     chart.data.datasets[0].data = [newData, 100 - newData];
     chart.update();
+}
+
+async function fetchInitialData() {
+    try {
+        const totalDividendsPool = await contract.methods.totalDividendsPool().call();
+        const totalTreasuryPool = await contract.methods.totalTreasuryPool().call();
+        return { totalDividendsPool, totalTreasuryPool };
+    } catch (error) {
+        console.error("Error al obtener datos iniciales:", error);
+        return { totalDividendsPool: 0, totalTreasuryPool: 0 };
+    }
+}
+
+function createCharts(data) {
+    const dividendChartCanvas = document.getElementById('dividend-chart');
+    const treasuryChartCanvas = document.getElementById('treasury-chart');
+
+    const dividendChart = new Chart(dividendChartCanvas, {
+        type: 'bar',
+        data: {
+            labels: ['Pool de Dividendos'],
+            datasets: [{
+                label: 'Total',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                data: [data.totalDividendsPool]
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+    const treasuryChart = new Chart(treasuryChartCanvas, {
+        type: 'bar',
+        data: {
+            labels: ['Pool del Tesoro'],
+            datasets: [{
+                label: 'Total',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                data: [data.totalTreasuryPool]
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
 }
