@@ -14,10 +14,12 @@
 
 /* Body */
 body {
-  font-family: var(--font-family);
-  background-color: #1d1f21;
-  color: #f5f5f5;
+    background-image: url("https://img.freepik.com/foto-gratis/composicion-abstracta-luz-ultravioleta-uv_23-2149243965.jpg?w=1380&t=st=1708905980~exp=1708906580~hmac=a8758d90d7c0538a61ffbdfb16a5ba6d13e98910c19d24e1d5cda4d608b94bc9");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
+
 
 /* Container */
 .container {
