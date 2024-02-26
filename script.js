@@ -59,8 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const userCurrentDeposit = parseInt(userDeposits) - parseInt(userWithdrawals); // Convertir a números antes de la resta
             const userTotalWithdrawals = userWithdrawals;
             const userTotalDividends = await contract.methods.userDividendsClaimed(userAccount).call();
-            // Actualizamos los elementos HTML con las estadísticas obtenidas
-            document.getElementById('user-address').innerText = userAccount; // Mostrar la dirección del usuario
+            // Actualizamos los elementos
             document.getElementById('total-deposits').innerText = web3.utils.fromWei(totalDeposits, 'ether');
             document.getElementById('total-treasury-pool').innerText = web3.utils.fromWei(totalTreasuryPool, 'ether');
             document.getElementById('total-dividends-pool').innerText = web3.utils.fromWei(totalDividendsPool, 'ether');
@@ -75,12 +74,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         async function updateTopDepositors() {
-            // Obtener los 10 depositantes principales
+            // Obtenemos los 10 principales depositantes
             const topDepositors = await contract.methods.getAllDepositors().call();
             const dividendsRanking = document.getElementById('dividends-ranking');
-            // Limpiar la lista antes de actualizarla
+            // Limpiamos la lista antes de actualizarla
             dividendsRanking.innerHTML = '';
-            // Mostrar los 10 depositantes principales en el ranking
+            // Mostramos los 10 principales depositantes en el ranking
             topDepositors.slice(0, 10).forEach((depositor, index) => {
                 const listItem = document.createElement('li');
                 listItem.textContent = `${index + 1}. ${depositor}`;
@@ -88,55 +87,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
+        setInterval(updateStats, 60000); // Actualizamos las estadísticas cada minuto
+        setInterval(updateCountdown, 1000); // Actualizamos el contador de cuenta atrás cada segundo
+
+        // Función para calcular el tiempo restante hasta el próximo pago de dividendos
+        function updateCountdown() {
+            const countdownTimer = document.getElementById('countdown-timer');
+            // Obtenemos la hora actual en UTC
+            const currentTime = new Date();
+            const currentUTCHours = currentTime.getUTCHours();
+            const currentUTCMinutes = currentTime.getUTCMinutes();
+            const currentUTCSeconds = currentTime.getUTCSeconds();
+            // Establecemos la hora del próximo pago de dividendos a las 20:30 UTC
+            let nextDividendsTime = new Date();
+            nextDividendsTime.setUTCHours(20, 30, 0);
+            // Si ya pasó la hora del próximo pago de dividendos, lo establecemos para el día siguiente
+            if (currentUTCHours > 20 || (currentUTCHours === 20 && currentUTCMinutes >= 30)) {
+                nextDividendsTime.setDate(nextDividendsTime.getDate() + 1);
+            }
+            // Calculamos la diferencia de tiempo
+            let timeDiff = nextDividendsTime - currentTime;
+            if (timeDiff < 0) {
+                // Si es negativo, significa que el tiempo ya ha pasado, lo establecemos para el día siguiente
+                nextDividendsTime.setDate(nextDividendsTime.getDate() + 1);
+                timeDiff = nextDividendsTime - currentTime;
+            }
+            // Calculamos las horas, minutos y segundos restantes
+            const hoursLeft = Math.floor(timeDiff / (1000 * 60 * 60));
+            const minutesLeft = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const secondsLeft = Math.floor((timeDiff % (1000 * 60)) / 1000);
+            // Actualizamos el contador de cuenta atrás
+            countdownTimer.textContent = `${hoursLeft.toString().padStart(2, '0')}:${minutesLeft.toString().padStart(2, '0')}:${secondsLeft.toString().padStart(2, '0')}`;
+        }
+        
     } else {
         alert('Por favor, instala MetaMask para utilizar esta aplicación.');
     }
 });
 
-// Función para calcular el tiempo restante hasta el próximo pago de dividendos
-function calcularTiempoRestanteParaPago() {
-    // Obtener la fecha y hora actuales en UTC
-    const ahora = new Date();
-    const horaActualUTC = ahora.getUTCHours();
-    const minutosActualesUTC = ahora.getUTCMinutes();
-    const segundosActualesUTC = ahora.getUTCSeconds();
-    // Calcular la cantidad de tiempo hasta las 20:00 UTC
-    let horasRestantes = 20 - horaActualUTC;
-    let minutosRestantes = 0;
-    let segundosRestantes = 0;
-    // Si ya es después de las 20:00 UTC, calcular el tiempo hasta las 20:00 UTC del día siguiente
-    if (horaActualUTC >= 20) {
-        horasRestantes = 24 - (horaActualUTC - 20);
-    }
-    // Calcular los minutos y segundos restantes
-    if (minutosActualesUTC > 0 || segundosActualesUTC > 0) {
-        horasRestantes--;
-        minutosRestantes = 60 - minutosActualesUTC;
-        segundosRestantes = 60 - segundosActualesUTC;
-    }
-    // Retornar el tiempo restante como objeto
-    return {
-        horas: horasRestantes,
-        minutos: minutosRestantes,
-        segundos: segundosRestantes
-    };
-}
-
-// Función para actualizar el contador de cuenta atrás
-function actualizarContador() {
-    // Obtener el elemento del contador
-    const contador = document.getElementById('countdown-timer');
-    // Calcular el tiempo restante
-    const tiempoRestante = calcularTiempoRestanteParaPago();
-    // Mostrar el tiempo restante en el contador
-    contador.textContent = `${tiempoRestante.horas}h ${tiempoRestante.minutos}m ${tiempoRestante.segundos}s`;
-}
-
-// Función para inicializar el contador de cuenta atrás
-function inicializarContador() {
-    // Actualizar el contador cada segundo
-    setInterval(actualizarContador, 1000);
-}
-
-// Inicializar el contador al cargar la página
-inicializarContador();
