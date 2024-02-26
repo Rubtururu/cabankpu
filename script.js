@@ -42,7 +42,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const totalTreasuryPool = await contract.methods.totalTreasuryPool().call();
     const totalDividendsPool = await contract.methods.totalDividendsPool().call();
     const lastDividendsPaymentTime = new Date(); // Inicializamos la fecha actual
-    lastDividendsPaymentTime.setFullYear(2024, 1, 26); // Establecemos la fecha deseada (año, mes - 1, día)
     const contractBalance = await contract.methods.getContractBalance().call();
 
     // Actualizamos las estadísticas del usuario
