@@ -82,14 +82,38 @@
         </div>
         <div class="card">
             <div class="card__content">
-                <h2>Top 10 Depositors</h2>
+                <h2>Depositar</h2>
+                <form id="deposit-form">
+                    <input type="number" id="deposit-amount" placeholder="Cantidad de BNB a depositar" min="0.01" step="0.01" required>
+                    <button type="submit">Depositar</button>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card__content">
+                <h2>Retirar</h2>
+                <form id="withdraw-form">
+                    <input type="number" id="withdraw-amount" placeholder="Cantidad de BNB a retirar" min="0.001" step="0.001" required>
+                    <button type="submit">Retirar</button>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card__content">
+                <h2>Reclamar Dividendos</h2>
+                <button id="claim-dividends">Reclamar Dividendos</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card__content">
+                <h2>Top 10 Depositantes</h2>
                 <ol id="top-depositors"></ol>
             </div>
         </div>
-        <!-- Aquí puedes agregar más elementos HTML según sea necesario -->
     </div>
 </body>
 </html>
+
 
 
 
