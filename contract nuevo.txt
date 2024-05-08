@@ -1,0 +1,85 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SimpleBankContract2 {
+    // Constants
+    uint256 public constant CREATOR_FEE_PERCENTAGE = 1;
+    uint256 public constant TREASURY_PERCENTAGE = 95;
+    uint256 public constant DIVIDENDS_PERCENTAGE = 4;
+    uint256 public constant DAILY_DIVIDENDS_INTERVAL = 1 days;
+
+    // State variables
+    address public ceoAddress;
+    uint256 public totalDeposits;
+    uint256 public totalTreasuryPool;
+    uint256 public totalDividendsPool;
+    uint256 public lastDividendsPaymentTime;
+
+    // Mappings
+    mapping(address => uint256) public userDeposits;
+    mapping(address => uint256) public userWithdrawals;
+    mapping(address => uint256) public userDividends;
+    mapping(address => uint256) public userDividendsClaimed;
+
+    // Events
+    event Deposit(address indexed user, uint256 amount);
+    event Withdrawal(address indexed user, uint256 amount);
+
+    constructor() {
+        ceoAddress = msg.sender;
+    }
+
+    function deposit() external payable {
+        require(msg.value > 0, "Must deposit a non-zero amount");
+
+        uint256 creatorFee = (msg.value * CREATOR_FEE_PERCENTAGE) / 100;
+        uint256 treasuryAmount = (msg.value * TREASURY_PERCENTAGE) / 100;
+        uint256 dividendsAmount = (msg.value * DIVIDENDS_PERCENTAGE) / 100;
+
+        totalDeposits += treasuryAmount;
+        totalTreasuryPool += treasuryAmount;
+        totalDividendsPool += dividendsAmount;
+
+        userDeposits[msg.sender] += treasuryAmount;
+
+        payable(ceoAddress).transfer(creatorFee);
+
+        emit Deposit(msg.sender, msg.value);
+    }
+
+    function withdraw(uint256 amount) external {
+        require(amount > 0, "Must withdraw a non-zero amount");
+        require(userDeposits[msg.sender] >= amount, "Insufficient funds");
+
+        uint256 withdrawableAmount = amount;
+        require(address(this).balance >= withdrawableAmount, "Contract balance too low");
+
+        totalDeposits -= withdrawableAmount;
+        totalTreasuryPool -= withdrawableAmount;
+        userDeposits[msg.sender] -= withdrawableAmount;
+        userWithdrawals[msg.sender] += withdrawableAmount;
+
+        payable(msg.sender).transfer(withdrawableAmount);
+
+        emit Withdrawal(msg.sender, withdrawableAmount);
+    }
+
+    function claimDividends() external {
+        uint256 timePassed = block.timestamp - lastDividendsPaymentTime;
+        require(timePassed >= DAILY_DIVIDENDS_INTERVAL, "Not enough time passed since last dividends payment");
+
+        uint256 dividendsPerUser = (totalDividendsPool * 1) / totalDeposits;
+        uint256 userDailyDividends = dividendsPerUser * userDeposits[msg.sender];
+
+        userDividends[msg.sender] += userDailyDividends;
+        userDividendsClaimed[msg.sender] += userDailyDividends;
+        totalDividendsPool -= userDailyDividends;
+
+        lastDividendsPaymentTime = block.timestamp;
+    }
+
+    function getUserDailyDividends(address user) public view returns (uint256) {
+        uint256 dividendsPerUser = (totalDividendsPool * 1) / totalDeposits;
+        return dividendsPerUser * userDeposits[user];
+    }
+}
