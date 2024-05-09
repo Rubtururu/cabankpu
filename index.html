@@ -20,9 +20,9 @@
             <div class="card__content">
                 <h2>Estadísticas del Contrato</h2>
                 <div class="stat">
-    <p>Dirección del Usuario:</p>
-    <p class="highlight"><span id="user-address">--</span></p>
-</div>
+                    <p>Dirección del Usuario:</p>
+                    <p class="highlight"><span id="user-address">--</span></p>
+                </div>
                 <div class="stat">
                     <p>Total Deposits:</p>
                     <p class="highlight"><span id="total-deposits">--</span> BNB</p>
@@ -105,5 +105,16 @@
             </div>
         </div>
     </div>
+    <script>
+        // Add the following JavaScript code to initialize the Web3 instance
+        if (window.ethereum) {
+            window.web3 = new Web3(window.ethereum);
+            window.ethereum.enable();
+        } else if (window.web3) {
+            window.web3 = new Web3(window.web3.currentProvider);
+        } else {
+            alert('Please install MetaMask to use this application.');
+        }
+    </script>
 </body>
 </html>
